@@ -3,10 +3,14 @@ package com.forlera.Controller;
 import com.forlera.Entity.Car;
 import com.forlera.Service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by OLEX on 01.11.2017.
@@ -25,8 +29,9 @@ public class CarController {
     }
 
     @RequestMapping(value="/{id}",method = RequestMethod.GET)
-    public Car getCarById(@PathVariable("id") int id ){
-        return  carService.getCarById(id);
+    public ResponseEntity getCarById(@PathVariable("id") int id ){
+        Car myCar= carService.getCarById(id);
+        return new ResponseEntity("price"+" : "+myCar.getPrice()+" "+"contact"+" : "+myCar.getContact(),HttpStatus.OK);
     }
 
     @RequestMapping(value="/{id}", method = RequestMethod.DELETE)
@@ -34,14 +39,17 @@ public class CarController {
         carService.removeCarById(id);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void updateCar(@RequestBody Car car){
-        carService.updateCar(car);
-    }
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity insertCar(@RequestBody Map<String,String> newMap,
+                                    @RequestParam("contact") String contact,
+                                    @RequestParam("price") int price) {
 
-    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void insertCar(@RequestBody Car car ){
-        carService.insertCar(car);
+        String name = newMap.get("name").toString();
+        int year = Integer.parseInt(newMap.get("year"));
+        int id = Integer.parseInt(newMap.get("id").toString());
+        carService.insertCar(new Car(name,year,id,contact,price));
+
+        return new ResponseEntity("carId"+" : "+id,HttpStatus.OK);
     }
 }
 
